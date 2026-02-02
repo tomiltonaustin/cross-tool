@@ -1,0 +1,9 @@
+manufacturer,model_number,category,form_factor,lumens,cct,wattage,voltage,mounting_type,cri,dimming_protocol,description,discontinued
+Acuity - Lithonia,LDN6 30L 835,Downlight,6 Inch Round,3000,3500,25,120/277V,Recessed,80,0-10V,6" LED Downlight,false
+Acuity - Lithonia,CPX 2x4 ALO7 SWW7,Troffer,2x4 Flat Panel,4000,3500,32,120/277V,Recessed,80,0-10V,2x4 CPX LED Flat Panel,false
+Cooper Lighting,SNR0612AE1D010UNV,Downlight,6 Inch Round,1200,3000,12,120/277V,Recessed,90,0-10V,Halo 6" LED New Construction Downlight,false
+Cooper Lighting,22SR-LD4-40-UNV,Troffer,2x2 Flat Panel,4000,4000,30,120/277V,Recessed,80,0-10V,Metalux 2x2 LED Troffer,false
+Signify - Philips,912401483832,High Bay,Round High Bay,24000,4000,165,120/277V,Pendant,80,0-10V,Philips Greenperform LED High Bay,false
+Hubbell - Columbia,CCL24-4040-C-EU,Troffer,2x4 Flat Panel,4000,4000,32,120/277V,Recessed,80,0-10V,Columbia 2x4 LED Troffer,false
+RAB Lighting,ALED3T78,Area Light,Type III,7800,4000,78,120/277V,Surface,70,0-10V,RAB LED Area Light,false
+Cree Lighting,C-AR-A-2L-23L-40K,Troffer,2x4 Architectural,2300,4000,24,120/277V,Recessed,90,DALI,Cree Cadiant 2x4 Architectural Troffer,false
