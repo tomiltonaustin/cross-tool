@@ -35,6 +35,8 @@ export type Product = {
   cri: number | null;
   dimming_protocol: string | null;
   description: string | null;
+  lamp_type: string | null;
+  application: string | null;
   discontinued: boolean;
   created_at: string;
   updated_at: string;
@@ -58,11 +60,17 @@ export type ScheduleItem = {
   type_designation: string | null;
   specified_manufacturer: string | null;
   specified_model: string | null;
+  description: string | null;
   lumens: number | null;
   cct: number | null;
   wattage: number | null;
   mounting_type: string | null;
   voltage: string | null;
+  lamp_type: string | null;
+  application: string | null;
+  dimming_protocol: string | null;
+  cri: number | null;
+  notes: string | null;
   quantity: number;
   on_line_card: boolean;
   match_status: "pending" | "matched" | "no_match" | "accepted" | "manual";
@@ -80,16 +88,22 @@ export type CrossReference = {
   product?: Product;
 };
 
-// Column mapping for CSV parsing
+// Column mapping for schedule parsing
 export type ColumnMapping = {
   type_designation?: string;
   manufacturer?: string;
   model?: string;
+  description?: string;
   lumens?: string;
   cct?: string;
   wattage?: string;
   mounting_type?: string;
   voltage?: string;
+  lamp_type?: string;
+  application?: string;
+  dimming_protocol?: string;
+  cri?: string;
+  notes?: string;
   quantity?: string;
 };
 
@@ -97,10 +111,16 @@ export type ParsedScheduleRow = {
   type_designation: string | null;
   specified_manufacturer: string | null;
   specified_model: string | null;
+  description: string | null;
   lumens: number | null;
   cct: number | null;
   wattage: number | null;
   mounting_type: string | null;
   voltage: string | null;
+  lamp_type: string | null;
+  application: string | null;
+  dimming_protocol: string | null;
+  cri: number | null;
+  notes: string | null;
   quantity: number;
 };

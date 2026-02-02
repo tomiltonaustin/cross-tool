@@ -224,12 +224,19 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     {item.specified_manufacturer ?? "Unknown"} — {item.specified_model ?? "Unknown"}
                   </span>
                 </div>
-                <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                {item.description && (
+                  <div className="mt-0.5 text-xs text-gray-600">{item.description}</div>
+                )}
+                <div className="mt-1 flex flex-wrap gap-3 text-xs text-gray-500">
                   {item.lumens && <span>{item.lumens}lm</span>}
                   {item.cct && <span>{item.cct}K</span>}
                   {item.wattage && <span>{item.wattage}W</span>}
-                  {item.mounting_type && <span>{item.mounting_type}</span>}
                   {item.voltage && <span>{item.voltage}</span>}
+                  {item.lamp_type && <span>{item.lamp_type}</span>}
+                  {item.application && <span>{item.application}</span>}
+                  {item.mounting_type && <span>{item.mounting_type}</span>}
+                  {item.cri && <span>CRI {item.cri}</span>}
+                  {item.dimming_protocol && <span>{item.dimming_protocol}</span>}
                   {item.quantity > 1 && <span>Qty: {item.quantity}</span>}
                 </div>
               </div>

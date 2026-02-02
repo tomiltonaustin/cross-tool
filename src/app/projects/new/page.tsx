@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { parseCSV, autoDetectColumns, applyMapping } from "@/lib/parsers/csv";
+import { parseFile, autoDetectColumns, applyMapping } from "@/lib/parsers/csv";
 import type { ColumnMapping, ParsedScheduleRow } from "@/types";
 
 export default function NewProjectPage() {
@@ -22,17 +22,13 @@ export default function NewProjectPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setProjectName(file.name.replace(/\.[^.]+$/, ""));
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      const { headers: h, rows } = parseCSV(text);
+    parseFile(file, ({ headers: h, rows }) => {
       setHeaders(h);
       setRawRows(rows);
       const autoMapping = autoDetectColumns(h);
       setMapping(autoMapping);
       setStep("map");
-    };
-    reader.readAsText(file);
+    });
   }
 
   function updateMapping(field: keyof ColumnMapping, value: string) {
@@ -63,7 +59,7 @@ export default function NewProjectPage() {
     }
     if (!agencyId) return;
 
-    // Get line card manufacturer IDs
+    // Get line card manufacturer names
     const { data: lineCards } = await supabase
       .from("line_cards")
       .select("manufacturer_id, manufacturers(name)")
@@ -76,12 +72,12 @@ export default function NewProjectPage() {
       }).filter(Boolean)
     );
 
-    // Create project - use a placeholder user ID for MVP (no auth)
+    // Create project
     const { data: project, error: projectError } = await supabase
       .from("projects")
       .insert({
         agency_id: agencyId,
-        created_by: agencyId, // placeholder
+        created_by: agencyId,
         name: projectName || "Untitled Project",
         status: "draft",
       })
@@ -101,11 +97,17 @@ export default function NewProjectPage() {
       type_designation: row.type_designation,
       specified_manufacturer: row.specified_manufacturer,
       specified_model: row.specified_model,
+      description: row.description,
       lumens: row.lumens,
       cct: row.cct,
       wattage: row.wattage,
       mounting_type: row.mounting_type,
       voltage: row.voltage,
+      lamp_type: row.lamp_type,
+      application: row.application,
+      dimming_protocol: row.dimming_protocol,
+      cri: row.cri,
+      notes: row.notes,
       quantity: row.quantity,
       on_line_card: row.specified_manufacturer
         ? lineCardMfrNames.has(row.specified_manufacturer.toLowerCase())
@@ -121,12 +123,18 @@ export default function NewProjectPage() {
   const mappingFields: { key: keyof ColumnMapping; label: string }[] = [
     { key: "type_designation", label: "Type / Tag" },
     { key: "manufacturer", label: "Manufacturer" },
-    { key: "model", label: "Model / Catalog #" },
+    { key: "model", label: "Model / Part Number" },
+    { key: "description", label: "Description" },
     { key: "lumens", label: "Lumens" },
     { key: "cct", label: "CCT" },
     { key: "wattage", label: "Wattage" },
-    { key: "mounting_type", label: "Mounting Type" },
     { key: "voltage", label: "Voltage" },
+    { key: "lamp_type", label: "Lamp Type" },
+    { key: "mounting_type", label: "Mounting Type" },
+    { key: "application", label: "Application" },
+    { key: "dimming_protocol", label: "Dimming" },
+    { key: "cri", label: "CRI" },
+    { key: "notes", label: "Notes" },
     { key: "quantity", label: "Quantity" },
   ];
 
@@ -136,10 +144,10 @@ export default function NewProjectPage() {
 
       {step === "upload" && (
         <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-          <p className="text-gray-600 mb-4">Upload a luminaire schedule (CSV)</p>
+          <p className="text-gray-600 mb-4">Upload a luminaire schedule (CSV or Excel)</p>
           <input
             type="file"
-            accept=".csv"
+            accept=".csv,.xlsx,.xls"
             onChange={handleFile}
             className="text-sm"
           />
@@ -193,7 +201,7 @@ export default function NewProjectPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     {headers.map((h) => (
-                      <th key={h} className="border-b px-3 py-2 text-left font-medium">
+                      <th key={h} className="border-b px-3 py-2 text-left font-medium whitespace-nowrap">
                         {h}
                       </th>
                     ))}
@@ -203,7 +211,7 @@ export default function NewProjectPage() {
                   {rawRows.slice(0, 5).map((row, i) => (
                     <tr key={i}>
                       {headers.map((h) => (
-                        <td key={h} className="border-b px-3 py-1.5">
+                        <td key={h} className="border-b px-3 py-1.5 whitespace-nowrap">
                           {row[h]}
                         </td>
                       ))}
@@ -235,23 +243,33 @@ export default function NewProjectPage() {
                     <th className="px-3 py-2 text-left font-medium">Type</th>
                     <th className="px-3 py-2 text-left font-medium">Manufacturer</th>
                     <th className="px-3 py-2 text-left font-medium">Model</th>
+                    <th className="px-3 py-2 text-left font-medium">Description</th>
                     <th className="px-3 py-2 text-left font-medium">Lumens</th>
                     <th className="px-3 py-2 text-left font-medium">CCT</th>
                     <th className="px-3 py-2 text-left font-medium">Wattage</th>
-                    <th className="px-3 py-2 text-left font-medium">Mounting</th>
+                    <th className="px-3 py-2 text-left font-medium">Voltage</th>
+                    <th className="px-3 py-2 text-left font-medium">Lamp</th>
+                    <th className="px-3 py-2 text-left font-medium">Application</th>
+                    <th className="px-3 py-2 text-left font-medium">CRI</th>
+                    <th className="px-3 py-2 text-left font-medium">Dimming</th>
                     <th className="px-3 py-2 text-left font-medium">Qty</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {preview.slice(0, 10).map((row, i) => (
+                  {preview.map((row, i) => (
                     <tr key={i}>
                       <td className="border-b px-3 py-1.5">{row.type_designation ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.specified_manufacturer ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.specified_model ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.description ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.lumens ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.cct ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.wattage ?? "—"}</td>
-                      <td className="border-b px-3 py-1.5">{row.mounting_type ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.voltage ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.lamp_type ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.application ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.cri ?? "—"}</td>
+                      <td className="border-b px-3 py-1.5">{row.dimming_protocol ?? "—"}</td>
                       <td className="border-b px-3 py-1.5">{row.quantity}</td>
                     </tr>
                   ))}
